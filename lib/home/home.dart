@@ -88,10 +88,7 @@ class _HomeState extends State<Home> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-              child: Text(
-                currentPath.isEmpty ? "/" : "/$currentPath",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              child: _buildPathBreadcrumbs(),
             ),
           ),
           //Dir List
@@ -212,6 +209,12 @@ class _HomeState extends State<Home> {
     if (currentPath.isEmpty) return;
     final int splitIndex = currentPath.lastIndexOf('/');
     currentPath = splitIndex == -1 ? "" : currentPath.substring(0, splitIndex);
+    await _loadFileAndFolder(currentPath);
+  }
+
+  Future<void> _navigateToPath(String path) async {
+    if (currentPath == path) return;
+    currentPath = path;
     await _loadFileAndFolder(currentPath);
   }
 
@@ -361,6 +364,39 @@ class _HomeState extends State<Home> {
     );
 
     return result ?? false;
+  }
+
+  Widget _buildPathBreadcrumbs() {
+    final List<String> segments = currentPath.isEmpty
+        ? <String>[]
+        : currentPath.split('/').where((segment) => segment.isNotEmpty).toList();
+    final TextStyle? textStyle = Theme.of(context).textTheme.bodyMedium;
+    final List<Widget> children = <Widget>[
+      GestureDetector(
+        onTap: () => _navigateToPath(""),
+        child: Text('/', style: textStyle),
+      ),
+    ];
+
+    if (segments.isEmpty) {
+      return Row(children: children);
+    }
+
+    for (int i = 0; i < segments.length; i++) {
+      final String nextPath = segments.take(i + 1).join('/');
+      children.add(Text(' / ', style: textStyle));
+      children.add(
+        GestureDetector(
+          onTap: () => _navigateToPath(nextPath),
+          child: Text(segments[i], style: textStyle),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(children: children),
+    );
   }
 }
 
