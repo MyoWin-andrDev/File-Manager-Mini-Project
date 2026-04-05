@@ -6,7 +6,14 @@ import 'package:file_management/home/edit_text_screen.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({
+    super.key,
+    required this.currentThemeMode,
+    required this.onThemeModeChanged,
+  });
+
+  final ThemeMode currentThemeMode;
+  final ValueChanged<ThemeMode> onThemeModeChanged;
 
   @override
   State<Home> createState() => _HomeState();
@@ -51,6 +58,28 @@ class _HomeState extends State<Home> {
               await _createFolderAndFile(isFolder: false);
             },
             icon: Icon(Icons.upload_file),
+          ),
+          PopupMenuButton<ThemeMode>(
+            tooltip: "Theme Mode",
+            onSelected: widget.onThemeModeChanged,
+            itemBuilder: (context) => [
+              CheckedPopupMenuItem<ThemeMode>(
+                value: ThemeMode.system,
+                checked: widget.currentThemeMode == ThemeMode.system,
+                child: const Text("System"),
+              ),
+              CheckedPopupMenuItem<ThemeMode>(
+                value: ThemeMode.light,
+                checked: widget.currentThemeMode == ThemeMode.light,
+                child: const Text("Light"),
+              ),
+              CheckedPopupMenuItem<ThemeMode>(
+                value: ThemeMode.dark,
+                checked: widget.currentThemeMode == ThemeMode.dark,
+                child: const Text("Dark"),
+              ),
+            ],
+            icon: const Icon(Icons.menu),
           ),
         ],
       ),
